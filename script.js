@@ -10,7 +10,6 @@ const scores = {};
 for (let i = 1; i <= 39; i++) scores[i] = 0;
 
 draws.forEach((draw, index) => {
-// More recent draws get higher weight
 const weight = draws.length - index;
 draw.numbers.forEach((n) => {
 scores[n] += weight;
@@ -90,8 +89,8 @@ draws.forEach((draw, i) => {
 ```
 
 } catch (err) {
-alert(err.message);
 console.error(err);
+alert(err.message);
 } finally {
 btn.disabled = false;
 btn.textContent = 'Generate Picks';
