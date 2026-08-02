@@ -1,7 +1,11 @@
 async function loadDraws() {
 const res = await fetch('/api/draws');
 const data = await res.json();
-if (!res.ok) throw new Error(data.error || 'Failed to load draws');
+
+if (!res.ok) {
+throw new Error(data.error || 'Failed to load MegaDice draws');
+}
+
 return data.draws;
 }
 
@@ -9,6 +13,8 @@ function scoreNumbers(draws) {
 const scores = {};
 for (let i = 1; i <= 39; i++) scores[i] = 0;
 
+// Recency weighting:
+// newest draw gets highest weight
 draws.forEach((draw, index) => {
 const weight = draws.length - index;
 draw.numbers.forEach((n) => {
@@ -27,19 +33,18 @@ return Object.entries(scores)
 }
 
 function buildPicks(top) {
-const triples = [
+return {
+triples: [
 top.slice(0, 3),
 [top[1], top[3], top[5]].sort((a, b) => a - b),
-[top[2], top[4], top[6]].sort((a, b) => a - b),
-];
-
-const sixes = [
+[top[2], top[4], top[6]].sort((a, b) => a - b)
+],
+sixes: [
 top.slice(0, 6).sort((a, b) => a - b),
 [top[1], top[2], top[4], top[5], top[6], top[7]].sort((a, b) => a - b),
-[top[0], top[2], top[3], top[5], top[7], top[8]].sort((a, b) => a - b),
-];
-
-return { triples, sixes };
+[top[0], top[2], top[3], top[5], top[7], top[8]].sort((a, b) => a - b)
+]
+};
 }
 
 async function render() {
@@ -49,11 +54,12 @@ btn.textContent = 'Generating...';
 
 try {
 const draws = await loadDraws();
+
+```
 const scores = scoreNumbers(draws);
 const top = topNumbers(scores, 10);
 const { triples, sixes } = buildPicks(top);
 
-```
 document.getElementById('best3').textContent = triples[0].join(' • ');
 document.getElementById('best6').textContent = sixes[0].join(' • ');
 
@@ -67,16 +73,14 @@ table.innerHTML = '';
 
 triples.forEach((set, i) => {
   tripleEl.innerHTML += `
-    <div class="pick">
-      #${i + 1}: ${set.join(' • ')}
-    </div>`;
+    <div class="pick">#${i + 1}: ${set.join(' • ')}</div>
+  `;
 });
 
 sixes.forEach((set, i) => {
   sixEl.innerHTML += `
-    <div class="pick">
-      #${i + 1}: ${set.join(' • ')}
-    </div>`;
+    <div class="pick">#${i + 1}: ${set.join(' • ')}</div>
+  `;
 });
 
 draws.forEach((draw, i) => {
@@ -84,7 +88,8 @@ draws.forEach((draw, i) => {
     <tr>
       <td>${i + 1}</td>
       <td>${draw.numbers.join(' - ')}</td>
-    </tr>`;
+    </tr>
+  `;
 });
 ```
 
