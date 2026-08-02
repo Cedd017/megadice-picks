@@ -55,7 +55,6 @@ btn.textContent = 'Generating...';
 try {
 const draws = await loadDraws();
 
-```
 const scores = scoreNumbers(draws);
 const top = topNumbers(scores, 10);
 const { triples, sixes } = buildPicks(top);
@@ -91,7 +90,6 @@ draws.forEach((draw, i) => {
     </tr>
   `;
 });
-```
 
 } catch (err) {
 console.error(err);
