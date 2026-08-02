@@ -1,9 +1,8 @@
 // api/draws.js
-// Fetches the latest 30 MegaDice draws from CA.LottoNumbers.com
-// Source: https://ca.lottonumbers.com/ontario/megadice-lotto/past-numbers
+// Scrapes the latest 30 Ontario MegaDice Lotto draws from Lottery Post
 
 const SOURCE_URL =
-'https://ca.lottonumbers.com/ontario/megadice-lotto/past-numbers';
+'https://www.lotterypost.com/results/on/megadicelotto/past';
 
 module.exports = async (req, res) => {
 try {
@@ -21,38 +20,36 @@ if (!response.ok) {
 
 const html = await response.text();
 
-// Parse dates and numbers from the page.
-// The page contains entries such as:
-// Friday Jul 24 2026
-// 8 10 15 25 37 39 1
 const draws = [];
 const regex =
-  /(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\\s+[A-Za-z]{3,9}\\s+\\d{1,2}\\s+\\d{4}[\\s\\S]{0,120}?((?:\\b\\d{1,2}\\b\\s*){7})/g;
+  /(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),?\\s+[A-Za-z]+\\s+\\d{1,2},?\\s+\\d{4}[\\s\\S]{0,200}?((?:\\b\\d{1,2}\\b\\s*){6})[\\s\\S]{0,80}?Bonus:?\\s*((?:\\b\\d{1,2}\\b)?)/g;
 
 let match;
 while ((match = regex.exec(html)) !== null && draws.length < 30) {
-  const date = match[0]
-    .match(
-      /(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\\s+[A-Za-z]{3,9}\\s+\\d{1,2}\\s+\\d{4}/
-    )[0];
+  const dateMatch = match[0].match(
+    /(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),?\\s+[A-Za-z]+\\s+\\d{1,2},?\\s+\\d{4}/
+  );
 
-  const nums = match[2]
+  const numbers = match[2]
     .trim()
     .split(/\\s+/)
-    .map(Number);
+    .map(Number)
+    .filter((n) => n >= 1 && n <= 39);
 
-  if (nums.length >= 6) {
+  const bonus = match[3] ? Number(match[3]) : null;
+
+  if (dateMatch && numbers.length === 6) {
     draws.push({
-      date,
-      numbers: nums.slice(0, 6),
-      bonus: nums[6] ?? null,
+      date: dateMatch[0],
+      numbers,
+      bonus,
     });
   }
 }
 
 if (draws.length === 0) {
   return res.status(502).json({
-    error: 'Could not parse MegaDice results from CA.LottoNumbers.com',
+    error: 'Could not parse MegaDice results from Lottery Post',
   });
 }
 
