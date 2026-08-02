@@ -41,7 +41,11 @@ button{
   font-size:20px
 }
 table{width:100%;border-collapse:collapse}
-th,td{padding:12px;border-bottom:1px solid rgba(148,163,184,.15)}
+th,td{padding:12px;border-bottom:1px solid rgba(148,163,184,.15);text-align:left}
+th{color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+td{color:#e5e7eb}
+.col-index{width:48px;color:#64748b}
+.col-date{width:160px;white-space:nowrap}
 @media(max-width:800px){
   .hero,.grid{grid-template-columns:1fr}
   .header{flex-direction:column;align-items:flex-start;gap:16px}
