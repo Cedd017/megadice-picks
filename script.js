@@ -29,20 +29,44 @@ function topNumbers(scores, count) {
 return Object.entries(scores)
 .sort((a, b) => b[1] - a[1])
 .slice(0, count)
-.map(([n]) => Number(n));
+.map(([n, w]) => ({ n: Number(n), w }));
+}
+
+// Weighted random sample of `count` distinct numbers from `pool`,
+// biased toward higher-weighted numbers but not identical every time.
+function weightedSample(pool, count) {
+const remaining = pool.map((p) => ({ ...p }));
+const picked = [];
+
+while (picked.length < count && remaining.length) {
+const total = remaining.reduce((sum, p) => sum + p.w, 0);
+let r = Math.random() * total;
+let idx = 0;
+for (; idx < remaining.length; idx++) {
+r -= remaining[idx].w;
+if (r <= 0) break;
+}
+picked.push(remaining.splice(Math.min(idx, remaining.length - 1), 1)[0].n);
+}
+
+return picked.sort((a, b) => a - b);
 }
 
 function buildPicks(top) {
+// Candidate pool: top-weighted numbers, used for the randomized alternates.
+const pool = top.slice(0, 12);
+const best = top.map((p) => p.n);
+
 return {
 triples: [
-top.slice(0, 3),
-[top[1], top[3], top[5]].sort((a, b) => a - b),
-[top[2], top[4], top[6]].sort((a, b) => a - b)
+best.slice(0, 3).sort((a, b) => a - b),
+weightedSample(pool, 3),
+weightedSample(pool, 3)
 ],
 sixes: [
-top.slice(0, 6).sort((a, b) => a - b),
-[top[1], top[2], top[4], top[5], top[6], top[7]].sort((a, b) => a - b),
-[top[0], top[2], top[3], top[5], top[7], top[8]].sort((a, b) => a - b)
+best.slice(0, 6).sort((a, b) => a - b),
+weightedSample(pool, 6),
+weightedSample(pool, 6)
 ]
 };
 }
@@ -85,7 +109,8 @@ sixes.forEach((set, i) => {
 draws.forEach((draw, i) => {
   table.innerHTML += `
     <tr>
-      <td>${i + 1}</td>
+      <td class="col-index">${i + 1}</td>
+      <td class="col-date">${draw.date}</td>
       <td>${draw.numbers.join(' - ')}</td>
     </tr>
   `;
