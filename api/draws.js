@@ -1,8 +1,8 @@
 // api/draws.js
-// Scrapes the latest 30 Ontario MegaDice Lotto draws from Lottery Post
+// Live MegaDice results from LotteryInformation.us
 
 const SOURCE_URL =
-'https://www.lotterypost.com/results/on/megadicelotto/past';
+'https://www.lotteryinformation.us/apps/past-results.php?game=ONMD&state=ON';
 
 module.exports = async (req, res) => {
 try {
@@ -22,34 +22,27 @@ const html = await response.text();
 
 const draws = [];
 const regex =
-  /(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),?\\s+[A-Za-z]+\\s+\\d{1,2},?\\s+\\d{4}[\\s\\S]{0,200}?((?:\\b\\d{1,2}\\b\\s*){6})[\\s\\S]{0,80}?Bonus:?\\s*((?:\\b\\d{1,2}\\b)?)/g;
+  /(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\\s+[A-Za-z]{3}\\s+\\d{1,2},\\s+\\d{4}\\s+((?:\\d{2}-){5}\\d{2})\\s+BB:(\\d{2})/g;
 
 let match;
 while ((match = regex.exec(html)) !== null && draws.length < 30) {
-  const dateMatch = match[0].match(
-    /(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),?\\s+[A-Za-z]+\\s+\\d{1,2},?\\s+\\d{4}/
-  );
+  const date = match[0].match(
+    /(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\\s+[A-Za-z]{3}\\s+\\d{1,2},\\s+\\d{4}/
+  )[0];
 
-  const numbers = match[2]
-    .trim()
-    .split(/\\s+/)
-    .map(Number)
-    .filter((n) => n >= 1 && n <= 39);
+  const numbers = match[2].split('-').map((n) => parseInt(n, 10));
+  const bonus = parseInt(match[3], 10);
 
-  const bonus = match[3] ? Number(match[3]) : null;
-
-  if (dateMatch && numbers.length === 6) {
-    draws.push({
-      date: dateMatch[0],
-      numbers,
-      bonus,
-    });
-  }
+  draws.push({
+    date,
+    numbers,
+    bonus,
+  });
 }
 
 if (draws.length === 0) {
-  return res.status(502).json({
-    error: 'Could not parse MegaDice results from Lottery Post',
+  return res.status(500).json({
+    error: 'Could not parse live MegaDice results',
   });
 }
 
