@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MegaDice Edge</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div>
+        <h1>MegaDice Edge</h1>
+        <p class="muted">Statistical picks from the most recent 30 MegaDice draws</p>
+      </div>
+      <button id="generateBtn">Generate Picks</button>
+    </header>
+
+    <section class="hero">
+      <div class="hero-card">
+        <div class="label">Best 3-number pick</div>
+        <div id="best3" class="big">-</div>
+      </div>
+      <div class="hero-card">
+        <div class="label">Best 6-number pick</div>
+        <div id="best6" class="big">-</div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>3-number picks</h2>
+        <div id="triples"></div>
+      </div>
+      <div class="card">
+        <h2>6-number picks</h2>
+        <div id="sixes"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Recent 30 draws</h2>
+      <table>
+        <thead>
+          <tr><th>#</th><th>Numbers</th></tr>
+        </thead>
+        <tbody id="drawTable"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
